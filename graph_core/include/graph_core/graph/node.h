@@ -27,7 +27,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <eigen3/Eigen/Core>
-#include <ros/ros.h>
+//#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <graph_core/util.h>
 #include <graph_core/graph/connection.h>
 
@@ -41,6 +42,8 @@ protected:
   unsigned int ndof_;
   bool analyzed_;
   bool non_optimal_;
+
+  rclcpp::Logger logger = rclcpp::get_logger("graph/node");
 public:
   std::vector<ConnectionPtr> parent_connections_;
   std::vector<ConnectionPtr> child_connections_;
@@ -84,10 +87,11 @@ public:
   ~Node();
 
 
-  XmlRpc::XmlRpcValue toXmlRpcValue() const;
+  // XmlRpcValue not supported in ROS2
+//  XmlRpc::XmlRpcValue toXmlRpcValue() const;
   friend std::ostream& operator<<(std::ostream& os, const Node& path);
 
-  static NodePtr fromXmlRpcValue(const XmlRpc::XmlRpcValue& x);
+//  static NodePtr fromXmlRpcValue(const XmlRpc::XmlRpcValue& x);
 };
 
 std::ostream& operator<<(std::ostream& os, const Node& node);

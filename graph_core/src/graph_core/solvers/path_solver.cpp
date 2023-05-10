@@ -36,7 +36,7 @@ PathLocalOptimizer::PathLocalOptimizer(const CollisionCheckerPtr &checker, const
 {
 
 }
-void PathLocalOptimizer::config(ros::NodeHandle &nh)
+void PathLocalOptimizer::config(std::shared_ptr<rclcpp::Node>& nh)
 {
   nh_ = nh;
   max_stall_gen_ = 10;
@@ -63,9 +63,9 @@ bool PathLocalOptimizer::step(PathPtr& solution)
 
   double cost = path_->cost();
 
-  ros::Time t1 = ros::Time::now();
+  rclcpp::Time t1 = rclcpp::Clock().now();
   bool solved = !path_->warp();
-  PATH_COMMENT("warp needs %f seconds", (ros::Time::now() - t1).toSec());
+  PATH_COMMENT("warp needs %f seconds", (rclcpp::Clock().now() - t1).seconds());
 
   if (cost <= (1.001 * path_->cost()))
   {
@@ -97,7 +97,7 @@ bool PathLocalOptimizer::step(PathPtr& solution)
 
 bool PathLocalOptimizer::solve(PathPtr& solution, const unsigned int &max_iteration, const double& max_time)
 {
-  ros::WallTime tic = ros::WallTime::now();
+  rclcpp::Time tic = rclcpp::Clock(RCL_SYSTEM_TIME).now();
 
   if(max_time<=0.0) return false;
 
@@ -105,7 +105,7 @@ bool PathLocalOptimizer::solve(PathPtr& solution, const unsigned int &max_iterat
   solution = path_;
   while (iter++ < max_iteration)
   {
-    //    tic_cycle = ros::WallTime::now();
+    //    tic_cycle = rclcpp::Clock(RCL_SYSTEM_TIME)::now();
 
     if (solved_)
     {
@@ -114,15 +114,15 @@ bool PathLocalOptimizer::solve(PathPtr& solution, const unsigned int &max_iterat
     }
     step(solution);
 
-    //    toc_cycle = ros::WallTime::now();
+    //    toc_cycle = rclcpp::Clock(RCL_SYSTEM_TIME)::now();
     //    time_vector.push_back((toc_cycle-tic_cycle).toSec());
     //    mean = std::accumulate(time_vector.begin(), time_vector.end(),0.0)/((double) time_vector.size());
-    //    toc = ros::WallTime::now();
+    //    toc = rclcpp::Clock(RCL_SYSTEM_TIME)::now();
     //    time = max_time-(toc-tic).toSec();
 
     //    if(time<0.7*mean || time<=0.0) break;
 
-    if((ros::WallTime::now()-tic).toSec() >= 0.98*max_time) break;
+    if((rclcpp::Clock(RCL_SYSTEM_TIME).now()-tic).seconds() >= 0.98*max_time) break;
   }
   return solved_;
 }

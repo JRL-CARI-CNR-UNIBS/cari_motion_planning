@@ -85,7 +85,7 @@ void Node::remoteParentConnection(const ConnectionPtr &connection)
   std::vector<ConnectionPtr>::iterator it = std::find(parent_connections_.begin(), parent_connections_.end(), connection);
   if (it == parent_connections_.end())
   {
-    ROS_FATAL("connection is not in the parent vector");
+    RCLCPP_FATAL(logger, "connection is not in the parent vector");
 //    throw std::invalid_argument("connection is not in the parent vector");
   }
   else
@@ -99,7 +99,7 @@ void Node::remoteNetParentConnection(const ConnectionPtr &connection)
   std::vector<ConnectionPtr>::iterator it = std::find(net_parent_connections_.begin(), net_parent_connections_.end(), connection);
   if (it == net_parent_connections_.end())
   {
-    ROS_FATAL("connection is not in the net parent vector");
+    RCLCPP_FATAL(logger, "connection is not in the net parent vector");
   }
   else
   {
@@ -112,7 +112,7 @@ void Node::remoteChildConnection(const ConnectionPtr &connection)
   std::vector<ConnectionPtr>::iterator it = std::find(child_connections_.begin(), child_connections_.end(), connection);
   if (it == child_connections_.end())
   {
-    ROS_FATAL("connection is not in the child vector");
+    RCLCPP_FATAL(logger, "connection is not in the child vector");
     //  throw std::invalid_argument("connection is not in the child vector");
   }
   else
@@ -126,7 +126,7 @@ void Node::remoteNetChildConnection(const ConnectionPtr &connection)
   std::vector<ConnectionPtr>::iterator it = std::find(net_child_connections_.begin(), net_child_connections_.end(), connection);
   if (it == net_child_connections_.end())
   {
-    ROS_FATAL("connection is not in the child vector");
+    RCLCPP_FATAL(logger, "connection is not in the child vector");
     //  throw std::invalid_argument("connection is not in the child vector");
   }
   else
@@ -240,29 +240,29 @@ std::vector<NodePtr> Node::getNetParents() const
   return parents;
 }
 
-XmlRpc::XmlRpcValue Node::toXmlRpcValue() const
-{
-  XmlRpc::XmlRpcValue x;
-  x.setSize(configuration_.size());
-  for (int idx=0;idx<configuration_.size();idx++)
-    x[idx]=configuration_(idx);
-  return x;
-}
+//XmlRpc::XmlRpcValue Node::toXmlRpcValue() const
+//{
+//  XmlRpc::XmlRpcValue x;
+//  x.setSize(configuration_.size());
+//  for (int idx=0;idx<configuration_.size();idx++)
+//    x[idx]=configuration_(idx);
+//  return x;
+//}
 
-NodePtr Node::fromXmlRpcValue(const XmlRpc::XmlRpcValue& x)
-{
-  if (x.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
-  {
-    ROS_ERROR("loading from XmlRpcValue a node, but XmlRpcValue is not an array");
-    return NULL;
-  }
-  Eigen::VectorXd conf(x.size());
-  for (int idx=0;idx<x.size();idx++)
-  {
-    conf(idx)=x[idx];
-  }
-  return std::make_shared<Node>(conf);
-}
+//NodePtr Node::fromXmlRpcValue(const XmlRpc::XmlRpcValue& x)
+//{
+//  if (x.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
+//  {
+//    RCLCPP_ERROR("loading from XmlRpcValue a node, but XmlRpcValue is not an array");
+//    return NULL;
+//  }
+//  Eigen::VectorXd conf(x.size());
+//  for (int idx=0;idx<x.size();idx++)
+//  {
+//    conf(idx)=x[idx];
+//  }
+//  return std::make_shared<Node>(conf);
+//}
 
 std::ostream& operator<<(std::ostream& os, const Node& node)
 {

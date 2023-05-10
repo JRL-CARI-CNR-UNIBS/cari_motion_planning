@@ -26,7 +26,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <ros/ros.h>
+//#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <graph_core/multi_goal_selection/policies/policy_base.h>
 #include <graph_core/multi_goal_selection/rewards/reward_base.h>
 
@@ -56,7 +57,7 @@ protected:
   std::shared_ptr<multi_goal_selection::PolicyBase> policy_;
   std::shared_ptr<multi_goal_selection::RewardBase> reward_fcn_;
 
-
+  rclcpp::Logger logger = rclcpp::get_logger("goal_selection_manager");
 };
 
 }

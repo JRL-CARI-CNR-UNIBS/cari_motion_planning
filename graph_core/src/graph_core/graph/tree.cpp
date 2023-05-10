@@ -42,6 +42,7 @@ Tree::Tree(const NodePtr& root,
   checker_(checker),
   metrics_(metrics)
 {
+
   if (use_kdtree)
   {
     nodes_=std::make_shared<KdTree>();
@@ -263,7 +264,8 @@ bool Tree::informedExtend(const Eigen::VectorXd &configuration, NodePtr &new_nod
 
 bool Tree::connectToNode(const NodePtr &node, NodePtr &new_node, const double &max_time)
 {
-  ros::WallTime tic = ros::WallTime::now();
+//  ros::WallTime tic = ros::WallTime::now();
+  rclcpp::Time tic = rclcpp::Clock().now(); // node needed??
 
   if(max_time<=0.0) return false;
 
@@ -271,7 +273,7 @@ bool Tree::connectToNode(const NodePtr &node, NodePtr &new_node, const double &m
   while (success)
   {
     NodePtr tmp_node;
-    ROS_DEBUG("calling extend");
+    RCLCPP_DEBUG(logger, "calling extend");
     success = extendToNode(node, tmp_node);
     if (success)
     {
@@ -281,7 +283,8 @@ bool Tree::connectToNode(const NodePtr &node, NodePtr &new_node, const double &m
         return true;
     }
 
-    if((ros::WallTime::now()-tic).toSec() >= 0.98*max_time) break;
+//    if((ros::WallTime::now()-tic).toSec() >= 0.98*max_time) break;
+    if((rclcpp::Clock().now()-tic).seconds() >= 0.98*max_time) break;
   }
   return false;
 }
@@ -331,7 +334,7 @@ bool Tree::rewireOnly(NodePtr& node, double r_rewire, const int& what_rewire)
 {
   if(what_rewire >2 || what_rewire <0)
   {
-    ROS_ERROR("what_rewire parameter should be 0,1 or 2");
+    RCLCPP_ERROR(logger, "what_rewire parameter should be 0,1 or 2");
     assert(0);
     return false;
   }
@@ -363,7 +366,7 @@ bool Tree::rewireOnly(NodePtr& node, double r_rewire, const int& what_rewire)
 
   if(rewire_parent)
   {
-    //ROS_DEBUG("try to find a better parent between %zu nodes", near_nodes.size());
+    //RCLCPP_DEBUG(logger, "try to find a better parent between %zu nodes", near_nodes.size());
     NodePtr nearest_node = node->getParents().at(0);
     for (const std::pair<double,NodePtr>& p : near_nodes)
     {
@@ -400,7 +403,7 @@ bool Tree::rewireOnly(NodePtr& node, double r_rewire, const int& what_rewire)
 
   if(rewire_children)
   {
-    //ROS_DEBUG("try to find a better child between %zu nodes", near_nodes.size());
+    //RCLCPP_DEBUG(logger, "try to find a better child between %zu nodes", near_nodes.size());
     for (const std::pair<double,NodePtr>& p : near_nodes)
     {
       const NodePtr& n = p.second;
@@ -435,7 +438,7 @@ bool Tree::rewireOnlyWithPathCheck(NodePtr& node, std::vector<ConnectionPtr>& ch
 
   if(what_rewire >2 || what_rewire <0)
   {
-    ROS_ERROR("what_rewire parameter should be 0,1 or 2");
+    RCLCPP_ERROR(logger, "what_rewire parameter should be 0,1 or 2");
     assert(0);
     return false;
   }
@@ -473,7 +476,7 @@ bool Tree::rewireOnlyWithPathCheck(NodePtr& node, std::vector<ConnectionPtr>& ch
 
   if(rewire_parent)
   {
-    //ROS_DEBUG("try to find a better parent between %zu nodes", near_nodes.size());
+    //RCLCPP_DEBUG(logger, "try to find a better parent between %zu nodes", near_nodes.size());
     NodePtr nearest_node = node->getParents().at(0);
     for (const std::pair<double,NodePtr>& p : near_nodes)
     {
@@ -516,7 +519,7 @@ bool Tree::rewireOnlyWithPathCheck(NodePtr& node, std::vector<ConnectionPtr>& ch
 
   if(rewire_children)
   {
-    //ROS_DEBUG("try to find a better child between %zu nodes", near_nodes.size());
+    //RCLCPP_DEBUG(logger, "try to find a better child between %zu nodes", near_nodes.size());
     for (const std::pair<double,NodePtr>& p : near_nodes)
     {
       const NodePtr& n = p.second;
@@ -581,7 +584,7 @@ bool Tree::rewireK(const Eigen::VectorXd &configuration)
 
   bool improved = false;
 
-  //ROS_DEBUG("try to find a better parent between %zu nodes", near_nodes.size());
+  //RCLCPP_DEBUG(logger, "try to find a better parent between %zu nodes", near_nodes.size());
   for (const std::pair<double,NodePtr>& p : near_nodes)
   {
     const NodePtr& node=p.second;
@@ -615,7 +618,7 @@ bool Tree::rewireK(const Eigen::VectorXd &configuration)
     improved = true;
   }
 
-  //ROS_DEBUG("try to find a better child between %zu nodes", near_nodes.size());
+  //RCLCPP_DEBUG(logger, "try to find a better child between %zu nodes", near_nodes.size());
   for (const std::pair<double,NodePtr>& p : near_nodes)
   {
     const NodePtr& n=p.second;
@@ -716,15 +719,15 @@ double Tree::costToNode(NodePtr node)
     {
       if (node->parent_connections_.size() != 1)
       {
-        ROS_ERROR_STREAM("a tree node should have exactly a parent. this node has 0: "<<*node);
+        RCLCPP_ERROR_STREAM(logger, "a tree node should have exactly a parent. this node has 0: "<<*node);
         return std::numeric_limits<double>::infinity();
       }
 
       if (node->parent_connections_.at(0)->getParent() == node)
       {
-        ROS_FATAL_STREAM("node "<< node.get() <<"=\n" << *node);
-        ROS_FATAL_STREAM("to parent\n" << * (node->parent_connections_.at(0)));
-        ROS_FATAL("connection between the same node");
+        RCLCPP_FATAL_STREAM(logger, "node "<< node.get() <<"=\n" << *node);
+        RCLCPP_FATAL_STREAM(logger, "to parent\n" << * (node->parent_connections_.at(0)));
+        RCLCPP_FATAL(logger, "connection between the same node");
         assert(0);
       }
       cost += node->parent_connections_.at(0)->getCost();
@@ -742,11 +745,11 @@ std::vector<ConnectionPtr> Tree::getConnectionToNode(NodePtr node)
     {
       if (node->parent_connections_.size() != 1)
       {
-        ROS_ERROR("a tree node should have only a parent");
-        ROS_ERROR_STREAM("node \n" << *node);
+        RCLCPP_ERROR(logger, "a tree node should have only a parent");
+        RCLCPP_ERROR_STREAM(logger, "node \n" << *node);
 
-        ROS_INFO_STREAM("current root "<<root_);
-        ROS_INFO_STREAM("node "<<node);
+        RCLCPP_INFO_STREAM(logger, "current root "<<root_);
+        RCLCPP_INFO_STREAM(logger, "node "<<node);
 
         assert(0);
       }
@@ -798,7 +801,7 @@ bool Tree::addBranch(const std::vector<ConnectionPtr> &connections)
   NodePtr start_node = connections.at(0)->getParent();
   if (!isInTree(start_node))
   {
-    ROS_ERROR("start node of the branch is not part of the tree");
+    RCLCPP_ERROR(logger, "start node of the branch is not part of the tree");
     return false;
   }
 
@@ -1018,49 +1021,49 @@ void Tree::populateTreeFromNode(const NodePtr& node, const Eigen::VectorXd& focu
 
 }
 
-XmlRpc::XmlRpcValue Tree::toXmlRpcValue() const
-{
-  XmlRpc::XmlRpcValue tree;
-  XmlRpc::XmlRpcValue nodes;
-  XmlRpc::XmlRpcValue connections;
-  int iconn=0;
+//XmlRpc::XmlRpcValue Tree::toXmlRpcValue() const
+//{
+//  XmlRpc::XmlRpcValue tree;
+//  XmlRpc::XmlRpcValue nodes;
+//  XmlRpc::XmlRpcValue connections;
+//  int iconn=0;
 
-  std::vector<NodePtr> nodes_vector=nodes_->getNodes();
-  for (size_t inode=0;inode<nodes_vector.size();inode++)
-  {
-    const NodePtr& n=nodes_vector.at(inode);
-    nodes[inode]=n->toXmlRpcValue();
-    std::vector<NodePtr> dest;
-      dest=n->getChildren();
+//  std::vector<NodePtr> nodes_vector=nodes_->getNodes();
+//  for (size_t inode=0;inode<nodes_vector.size();inode++)
+//  {
+//    const NodePtr& n=nodes_vector.at(inode);
+//    nodes[inode]=n->toXmlRpcValue();
+//    std::vector<NodePtr> dest;
+//      dest=n->getChildren();
 
-    for (size_t idest=0;idest<dest.size();idest++)
-    {
-      for (size_t in2=0;in2<nodes_vector.size();in2++)
-      {
-        if (nodes_vector.at(in2)==dest.at(idest))
-        {
-          XmlRpc::XmlRpcValue connection;
-          connection[0]=(int)inode;
-          connection[1]=(int)in2;
-          connections[iconn++]=connection;
-          break;
-        }
-      }
-    }
-  }
-  tree["nodes"]=nodes;
-  tree["connections"]=connections;
-  return tree;
-}
+//    for (size_t idest=0;idest<dest.size();idest++)
+//    {
+//      for (size_t in2=0;in2<nodes_vector.size();in2++)
+//      {
+//        if (nodes_vector.at(in2)==dest.at(idest))
+//        {
+//          XmlRpc::XmlRpcValue connection;
+//          connection[0]=(int)inode;
+//          connection[1]=(int)in2;
+//          connections[iconn++]=connection;
+//          break;
+//        }
+//      }
+//    }
+//  }
+//  tree["nodes"]=nodes;
+//  tree["connections"]=connections;
+//  return tree;
+//}
 
 
-void Tree::toXmlFile(const std::string& file_name) const
-{
-  std::string xml=toXmlRpcValue().toXml();
-  std::ofstream out(file_name);
-  out << xml;
-  out.close();
-}
+//void Tree::toXmlFile(const std::string& file_name) const
+//{
+//  std::string xml=toXmlRpcValue().toXml();
+//  std::ofstream out(file_name);
+//  out << xml;
+//  out.close();
+//}
 
 std::ostream& operator<<(std::ostream& os, const Tree& tree)
 {
@@ -1069,79 +1072,79 @@ std::ostream& operator<<(std::ostream& os, const Tree& tree)
   return os;
 }
 
-TreePtr Tree::fromXmlRpcValue(const XmlRpc::XmlRpcValue& x,
-                              const double& max_distance,
-                              const CollisionCheckerPtr& checker,
-                              const MetricsPtr& metrics,
-                              const bool &lazy)
-{
-  if (not x.hasMember("nodes"))
-  {
-    ROS_ERROR("loading from XmlRpcValue a tree without 'nodes' field");
-    return NULL;
-  }
-  if (not x.hasMember("connections"))
-  {
-    ROS_ERROR("loading from XmlRpcValue a tree without 'connections' field");
-    return NULL;
-  }
+//TreePtr Tree::fromXmlRpcValue(const XmlRpc::XmlRpcValue& x,
+//                              const double& max_distance,
+//                              const CollisionCheckerPtr& checker,
+//                              const MetricsPtr& metrics,
+//                              const bool &lazy)
+//{
+//  if (not x.hasMember("nodes"))
+//  {
+//    RCLCPP_ERROR(logger, "loading from XmlRpcValue a tree without 'nodes' field");
+//    return NULL;
+//  }
+//  if (not x.hasMember("connections"))
+//  {
+//    RCLCPP_ERROR(logger, "loading from XmlRpcValue a tree without 'connections' field");
+//    return NULL;
+//  }
 
-  XmlRpc::XmlRpcValue nodes=x["nodes"];
-  XmlRpc::XmlRpcValue connections=x["connections"];
-  if (nodes.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
-  {
-    ROS_ERROR("loading from XmlRpcValue a tree where 'nodes' is not an array");
-    return NULL;
-  }
-  if (connections.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
-  {
-    ROS_ERROR("loading from XmlRpcValue a tree where 'connections' is not an array");
-    return NULL;
-  }
-  NodePtr root=Node::fromXmlRpcValue(nodes[0]);
-  if (not lazy)
-  {
-    if (not checker->check(root->getConfiguration()))
-    {
-      ROS_DEBUG("root is in collision");
-      return NULL;
-    }
-  }
-  assert(root);
+//  XmlRpc::XmlRpcValue nodes=x["nodes"];
+//  XmlRpc::XmlRpcValue connections=x["connections"];
+//  if (nodes.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
+//  {
+//    RCLCPP_ERROR(logger, "loading from XmlRpcValue a tree where 'nodes' is not an array");
+//    return NULL;
+//  }
+//  if (connections.getType()!= XmlRpc::XmlRpcValue::Type::TypeArray)
+//  {
+//    RCLCPP_ERROR(logger, "loading from XmlRpcValue a tree where 'connections' is not an array");
+//    return NULL;
+//  }
+//  NodePtr root=Node::fromXmlRpcValue(nodes[0]);
+//  if (not lazy)
+//  {
+//    if (not checker->check(root->getConfiguration()))
+//    {
+//      RCLCPP_DEBUG(logger, "root is in collision");
+//      return NULL;
+//    }
+//  }
+//  assert(root);
 
 
-  std::vector<NodePtr> nodes_vector(nodes.size());
-  nodes_vector.at(0)=root;
-  for (int inode=1;inode<nodes.size();inode++)
-  {
-    nodes_vector.at(inode)=Node::fromXmlRpcValue(nodes[inode]);
-  }
+//  std::vector<NodePtr> nodes_vector(nodes.size());
+//  nodes_vector.at(0)=root;
+//  for (int inode=1;inode<nodes.size();inode++)
+//  {
+//    nodes_vector.at(inode)=Node::fromXmlRpcValue(nodes[inode]);
+//  }
 
-  for (int iconn=0;iconn<connections.size();iconn++)
-  {
-    int in1=connections[iconn][0];
-    int in2=connections[iconn][1];
+//  for (int iconn=0;iconn<connections.size();iconn++)
+//  {
+//    int in1=connections[iconn][0];
+//    int in2=connections[iconn][1];
 
-    NodePtr& n1=nodes_vector.at(in1);
-    NodePtr& n2=nodes_vector.at(in2);
-    ConnectionPtr conn;
-    conn=std::make_shared<Connection>(n1,n2);
-    conn->setCost(metrics->cost(n1,n2));
+//    NodePtr& n1=nodes_vector.at(in1);
+//    NodePtr& n2=nodes_vector.at(in2);
+//    ConnectionPtr conn;
+//    conn=std::make_shared<Connection>(n1,n2);
+//    conn->setCost(metrics->cost(n1,n2));
 
-    conn->add();
-  }
-  pathplan::TreePtr tree=std::make_shared<Tree>(root,max_distance,checker,metrics);
-  for (int inode=1;inode<nodes.size();inode++)
-  {
-    tree->addNode(nodes_vector.at(inode),false);
-  }
+//    conn->add();
+//  }
+//  pathplan::TreePtr tree=std::make_shared<Tree>(root,max_distance,checker,metrics);
+//  for (int inode=1;inode<nodes.size();inode++)
+//  {
+//    tree->addNode(nodes_vector.at(inode),false);
+//  }
 
-  if (not lazy)
-  {
-    tree->recheckCollision();
-  }
-  return tree;
-}
+//  if (not lazy)
+//  {
+//    tree->recheckCollision();
+//  }
+//  return tree;
+//}
 
 
 bool Tree::changeRoot(const NodePtr& node)

@@ -39,12 +39,14 @@ TimeBasedInformedSampler::TimeBasedInformedSampler(const Eigen::VectorXd& start_
   InformedSampler(start_configuration,stop_configuration,lower_bound,upper_bound,cost),
   max_speed_(max_speed)
 {
+  logger = logger.get_child("time");
+
   inv_max_speed_=max_speed_.cwiseInverse();
   utopia_=(stop_configuration_-start_configuration_).cwiseProduct(inv_max_speed_).cwiseAbs().maxCoeff();
   setCost(cost); // it is necessary because InformedSampler could change the cost if less than focii distance
-  ROS_DEBUG_STREAM("max_speed" << max_speed.transpose());
-  ROS_DEBUG_STREAM("inv_max_speed_" << inv_max_speed_.transpose());
-  ROS_DEBUG_STREAM("utopia_" << utopia_);
+  RCLCPP_DEBUG_STREAM(logger, "max_speed" << max_speed.transpose());
+  RCLCPP_DEBUG_STREAM(logger, "inv_max_speed_" << inv_max_speed_.transpose());
+  RCLCPP_DEBUG_STREAM(logger, "utopia_" << utopia_);
 
 }
 
@@ -56,7 +58,7 @@ void TimeBasedInformedSampler::setCost(const double &cost)
 
   if (cost_ < utopia_)
   {
-    ROS_WARN("cost is %f, utopia_ is %f", cost_, utopia_);
+    RCLCPP_WARN(logger, "cost is %f, utopia_ is %f", cost_, utopia_);
     cost_ = utopia_;
   }
 
@@ -106,7 +108,8 @@ Eigen::VectorXd TimeBasedInformedSampler::sample()
 
     if (iteration++>100000)
     {
-      ROS_ERROR_THROTTLE(1,"Unable to find a sample in the informed set, cost =%f",cost_);
+      //RCLCPP_ERROR_THROTTLE(logger, 1,"Unable to find a sample in the informed set, cost =%f",cost_);
+      RCLCPP_ERROR(logger, "Unable to find a sample in the informed set, cost =%f",cost_);
       return InformedSampler::sample();
     }
     q=ellipse_center_+0.5*cost_*Eigen::MatrixXd::Random(ndof_, 1).cwiseProduct(max_speed_);

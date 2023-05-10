@@ -28,7 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <eigen3/Eigen/Core>
 #include <graph_core/util.h>
-#include <ros/ros.h>
+//#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <random>
 
 namespace pathplan
@@ -63,7 +64,7 @@ protected:
   std::mt19937 gen_;
   std::uniform_real_distribution<double> ud_;
 
-
+  rclcpp::Logger logger= rclcpp::get_logger("sampler");
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   InformedSampler(const Eigen::VectorXd& start_configuration,
@@ -89,11 +90,12 @@ public:
 
     rot_matrix_ = computeRotationMatrix(start_configuration_, stop_configuration_);
 
-    ROS_DEBUG_STREAM("rot_matrix_:\n" << rot_matrix_);
-    ROS_DEBUG_STREAM("ellipse center" << ellipse_center_.transpose());
-    ROS_DEBUG_STREAM("focii_distance_" << focii_distance_);
-    ROS_DEBUG_STREAM("center_bound_" << center_bound_.transpose());
-    ROS_DEBUG_STREAM("bound_width_" << bound_width_.transpose());
+//    ROS_DEBUG_STREAM("rot_matrix_:\n" << rot_matrix_);
+    RCLCPP_DEBUG_STREAM(logger, "rot_matrix_:\n" << rot_matrix_);
+    RCLCPP_DEBUG_STREAM(logger, "ellipse center" << ellipse_center_.transpose());
+    RCLCPP_DEBUG_STREAM(logger, "focii_distance_" << focii_distance_);
+    RCLCPP_DEBUG_STREAM(logger, "center_bound_" << center_bound_.transpose());
+    RCLCPP_DEBUG_STREAM(logger, "bound_width_" << bound_width_.transpose());
 
 
     if (cost_ < std::numeric_limits<double>::infinity())

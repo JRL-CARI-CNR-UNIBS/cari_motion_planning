@@ -68,14 +68,14 @@ void Connection::remove()
     parent_->remoteChildConnection(pointer());
   }
   else
-    ROS_FATAL("parent already destroied");
+    RCLCPP_FATAL(logger, "parent already destroied");
 
   if (child_)
   {
     child_->remoteParentConnection(pointer());
   }
   else
-    ROS_FATAL("child already destroied");
+    RCLCPP_FATAL(logger, "child already destroied");
 
 }
 

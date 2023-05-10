@@ -29,7 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <graph_core/graph/path.h>
 #include <graph_core/collision_checker.h>
 #include <graph_core/metrics.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace pathplan
 {
@@ -41,7 +41,8 @@ class PathLocalOptimizer: public std::enable_shared_from_this<PathLocalOptimizer
 {
 
 protected:
-  ros::NodeHandle nh_;
+//  ros::NodeHandle nh_;
+  std::shared_ptr<rclcpp::Node> nh_;
   CollisionCheckerPtr checker_;
   MetricsPtr metrics_;
   PathPtr path_;
@@ -53,7 +54,7 @@ public:
   PathLocalOptimizer(const CollisionCheckerPtr& checker,
                      const MetricsPtr& metrics);
   void setPath(const PathPtr& path);
-  void config(ros::NodeHandle& nh);
+  void config(std::shared_ptr<rclcpp::Node>& nh);
   bool step(PathPtr& solution);
   bool solve(PathPtr& solution, const unsigned int& max_iteration = 100, const double &max_time = std::numeric_limits<double>::infinity());
 

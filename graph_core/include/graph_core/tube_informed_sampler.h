@@ -61,6 +61,7 @@ public:
     radius_=0;
     sampler_=sampler;
     metrics_=metrics;
+    logger = logger.get_child("tube");
   }
 
   bool setPath(const pathplan::PathPtr& path);

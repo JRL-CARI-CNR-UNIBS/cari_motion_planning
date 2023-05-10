@@ -39,6 +39,8 @@ ParallelMoveitCollisionChecker::ParallelMoveitCollisionChecker(const planning_sc
   MoveitCollisionChecker(planning_scene,group_name,min_distance),
   threads_num_(threads_num)
 {
+  logger = logger.get_child("parallel");
+
   min_distance_ = min_distance;
   group_name_ = group_name;
 
@@ -113,7 +115,7 @@ bool ParallelMoveitCollisionChecker::checkAllQueues()
 
 void ParallelMoveitCollisionChecker::collisionThread(int thread_idx)
 {
-  robot_state::RobotStatePtr state=std::make_shared<robot_state::RobotState>(planning_scenes_.at(thread_idx)->getCurrentState());
+  moveit::core::RobotStatePtr state=std::make_shared<moveit::core::RobotState>(planning_scenes_.at(thread_idx)->getCurrentState());
   const std::vector<std::vector<double>>& queue=queues_.at(thread_idx);
   for (const std::vector<double>& configuration: queue)
   {
@@ -165,17 +167,17 @@ void ParallelMoveitCollisionChecker::collisionThread(int thread_idx)
 
 ParallelMoveitCollisionChecker::~ParallelMoveitCollisionChecker()
 {
-  ROS_DEBUG("closing collision threads");
+  RCLCPP_DEBUG(logger, "closing collision threads");
   stop_check_=true;
   for (int idx=0;idx<threads_num_;idx++)
   {
     if (threads.at(idx).joinable())
       threads.at(idx).join();
   }
-  ROS_DEBUG("collision threads closed");
+  RCLCPP_DEBUG(logger, "collision threads closed");
 }
 
-void ParallelMoveitCollisionChecker::setPlanningSceneMsg(const moveit_msgs::PlanningScene& msg)
+void ParallelMoveitCollisionChecker::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& msg)
 {
   stop_check_=true;
   for (int idx=0;idx<threads_num_;idx++)
@@ -185,13 +187,15 @@ void ParallelMoveitCollisionChecker::setPlanningSceneMsg(const moveit_msgs::Plan
   }
   if (!planning_scene_->setPlanningSceneMsg(msg))
   {
-    ROS_ERROR_THROTTLE(1,"unable to upload scene");
+//    RCLCPP_ERROR_THROTTLE(1,"unable to upload scene");
+    RCLCPP_ERROR(logger, "unable to upload scene");
   }
   for (int idx=0;idx<threads_num_;idx++)
   {
     if(!planning_scenes_.at(idx)->setPlanningSceneMsg(msg))
     {
-      ROS_ERROR_THROTTLE(1,"unable to upload scene");
+//      RCLCPP_ERROR_THROTTLE(1,"unable to upload scene");
+      RCLCPP_ERROR(logger, "unable to upload scene");
     }
   }
 }
@@ -259,7 +263,7 @@ bool ParallelMoveitCollisionChecker::checkConnFromConf(const ConnectionPtr& conn
 
   if((dist-dist_child-dist_parent)>1e-04)
   {
-    ROS_ERROR("The conf is not on the connection between parent and child");
+    RCLCPP_ERROR(logger, "The conf is not on the connection between parent and child");
     assert(0);
     return false;
   }

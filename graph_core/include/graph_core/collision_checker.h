@@ -26,9 +26,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <ros/ros.h>
+//#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <eigen3/Eigen/Core>
-#include <moveit_msgs/PlanningScene.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
 #include <graph_core/graph/connection.h>
 #include <moveit/planning_scene/planning_scene.h>
 
@@ -41,6 +42,8 @@ class CollisionChecker
 {
 protected:
   double min_distance_ = 0.01;
+
+  rclcpp::Logger logger = rclcpp::get_logger("collision_checker");
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   CollisionChecker(const double& min_distance = 0.01):
@@ -49,7 +52,7 @@ public:
 
   }
 
-  virtual void setPlanningSceneMsg(const moveit_msgs::PlanningScene& msg){}
+  virtual void setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& msg){}
 
   virtual std::string getGroupName()
   {
@@ -158,7 +161,7 @@ public:
 
     if((dist-dist_child-dist_parent)>1e-04)
     {
-      ROS_ERROR("The conf is not on the connection between parent and child");
+      RCLCPP_ERROR(logger, "The conf is not on the connection between parent and child");
       assert(0);
       return false;
     }

@@ -54,6 +54,8 @@ protected:
 
   NearestNeighborsPtr nodes_;
 
+  rclcpp::Logger logger = rclcpp::get_logger("graph/tree");
+
   void purgeNodeOutsideEllipsoid(NodePtr& node,
                                  const SamplerPtr& sampler,
                                  const std::vector<NodePtr>& white_list,
@@ -201,15 +203,15 @@ public:
   CollisionCheckerPtr& getChecker() {return checker_;}
   bool getUseKdTree(){return use_kdtree_;}
 
-  XmlRpc::XmlRpcValue toXmlRpcValue() const;
-  void toXmlFile(const std::string& file_name) const;
+//  XmlRpc::XmlRpcValue toXmlRpcValue() const;
+//  void toXmlFile(const std::string& file_name) const;
   friend std::ostream& operator<<(std::ostream& os, const Tree& tree);
 
-  static TreePtr fromXmlRpcValue(const XmlRpc::XmlRpcValue& x,
-                                 const double& max_distance,
-                                 const CollisionCheckerPtr& checker,
-                                 const MetricsPtr& metrics,
-                                 const bool& lazy=false);
+//  static TreePtr fromXmlRpcValue(const XmlRpc::XmlRpcValue& x,
+//                                 const double& max_distance,
+//                                 const CollisionCheckerPtr& checker,
+//                                 const MetricsPtr& metrics,
+//                                 const bool& lazy=false);
 };
 
 std::ostream& operator<<(std::ostream& os, const Tree& tree);

@@ -28,9 +28,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <eigen3/Eigen/Core>
-#include <ros/ros.h>
-#define PATH_COMMENT(...) ROS_LOG(::ros::console::levels::Debug, ROSCONSOLE_DEFAULT_NAME, __VA_ARGS__)
-#define PATH_COMMENT_STREAM(...) ROS_LOG_STREAM(::ros::console::levels::Debug, ROSCONSOLE_DEFAULT_NAME, __VA_ARGS__)
+//#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
+//#define PATH_COMMENT(...) ROS_LOG(::ros::console::levels::Debug, ROSCONSOLE_DEFAULT_NAME, __VA_ARGS__)
+//#define PATH_COMMENT_STREAM(...) ROS_LOG_STREAM(::ros::console::levels::Debug, ROSCONSOLE_DEFAULT_NAME, __VA_ARGS__)
+#define PATH_COMMENT(...) RCLCPP_DEBUG(rclcpp::get_logger("graph_core"), __VA_ARGS__)
+#define PATH_COMMENT_STREAM(...) RCLCPP_DEBUG_STREAM(rclcpp::get_logger("graph_core"), __VA_ARGS__)
 
 namespace pathplan
 {

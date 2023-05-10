@@ -54,6 +54,8 @@ Path::Path(std::vector<NodePtr> nodes,
   metrics_(metrics),
   checker_(checker)
 {
+  logger = rclcpp::get_logger("log_graph_path");
+
   assert(nodes.size() > 0);
 
   connections_.clear();
@@ -130,8 +132,8 @@ double Path::curvilinearAbscissaOfPoint(const Eigen::VectorXd& conf, int& idx)
   ConnectionPtr connection = findConnection(conf,idx);
   if(connection == NULL)
   {
-    ROS_ERROR("The configuration does not belong to the path -> the curvilinear abscissa can not be computed");
-    ROS_INFO_STREAM("conf: "<<conf.transpose());
+    RCLCPP_ERROR(logger, "The configuration does not belong to the path -> the curvilinear abscissa can not be computed");
+    RCLCPP_INFO_STREAM(logger, "conf: "<<conf.transpose());
     assert(0);
     return abscissa;
   }
@@ -153,8 +155,8 @@ double Path::curvilinearAbscissaOfPointGivenConnection(const Eigen::VectorXd& co
 
   if(conn_idx < 0 || conn_idx >= connections_.size())
   {
-    ROS_ERROR("The connection does not belong to the path -> the curvilinear abscissa can not be computed");
-    ROS_INFO_STREAM("conn_idx: "<<conn_idx);
+    RCLCPP_ERROR(logger, "The connection does not belong to the path -> the curvilinear abscissa can not be computed");
+    RCLCPP_INFO_STREAM(logger, "conn_idx: "<<conn_idx);
     assert(0);
     return abscissa;
   }
@@ -189,7 +191,7 @@ double Path::getCostFromConf(const Eigen::VectorXd &conf)
 
   if(this_conn == NULL)
   {
-    ROS_ERROR("cost can't be computed");
+    RCLCPP_ERROR(logger, "cost can't be computed");
     return 0;
   }
   else
@@ -236,7 +238,7 @@ double Path::getNormFromConf(const Eigen::VectorXd &conf)
 
   if(this_conn == NULL)
   {
-    ROS_ERROR("norm can't be computed");
+    RCLCPP_ERROR(logger, "norm can't be computed");
     assert(0);
     return 0;
   }
@@ -338,7 +340,8 @@ bool Path::warp(const double &min_dist, const double &max_time)
 {
   if(max_time > 0)
   {
-    ros::WallTime tic = ros::WallTime::now();
+//    ros::WallTime tic = ros::WallTime::now();
+    rclcpp::Time tic = rclcpp::Clock().now();
     for (unsigned int idx = 1; idx < connections_.size(); idx++)
     {
       if(connections_.at(idx-1)->norm()>min_dist && connections_.at(idx)->norm()>min_dist)
@@ -362,7 +365,8 @@ bool Path::warp(const double &min_dist, const double &max_time)
         }
       }
 
-      if((ros::WallTime::now()-tic).toSec()>=0.98*max_time) break;
+//      if((ros::WallTime::now()-tic).toSec()>=0.98*max_time) break;
+      if((rclcpp::Clock().now()-tic).seconds() >= 0.98*max_time) break;
     }
   }
 
@@ -381,7 +385,7 @@ bool Path::resample(const double &distance)
     if (connections_.at(ic)->norm() <= distance)
       continue;
 
-    ROS_ERROR("still unimplemented");
+    RCLCPP_ERROR(logger, "still unimplemented");
     resampled = true;
   }
 
@@ -450,10 +454,10 @@ ConnectionPtr Path::findConnection(const Eigen::VectorXd& configuration, int& id
     }
   }
 
-  ROS_ERROR("Connection not found");
-  ROS_INFO_STREAM("conf: "<<configuration.transpose());
-  ROS_INFO_STREAM("parent0: "<<connections_.at(0)->getParent()->getConfiguration().transpose());
-  ROS_INFO_STREAM("child0: "<<connections_.at(0)->getChild()->getConfiguration().transpose());
+  RCLCPP_ERROR(logger, "Connection not found");
+  RCLCPP_INFO_STREAM(logger, "conf: "<<configuration.transpose());
+  RCLCPP_INFO_STREAM(logger, "parent0: "<<connections_.at(0)->getParent()->getConfiguration().transpose());
+  RCLCPP_INFO_STREAM(logger, "child0: "<<connections_.at(0)->getChild()->getConfiguration().transpose());
 
   return NULL;
 }
@@ -497,7 +501,7 @@ Eigen::VectorXd Path::projectOnConnection(const Eigen::VectorXd& point, const Co
     int index=0;
     if (findConnection(projection,index)==NULL)
     {
-      ROS_ERROR("distance = %f, s=%f, conn_length=%f",distance,s,conn_length);
+      RCLCPP_ERROR(logger, "distance = %f, s=%f, conn_length=%f",distance,s,conn_length);
     }
   }
 
@@ -531,7 +535,7 @@ const Eigen::VectorXd Path::projectOnClosestConnection(const Eigen::VectorXd& po
   if(min_distance == std::numeric_limits<double>::infinity())
   {
     projection = findCloserNode(point)->getConfiguration();
-    ROS_ERROR("projection on path not found");
+    RCLCPP_ERROR(logger, "projection on path not found");
   }
   return projection;
 }
@@ -572,7 +576,7 @@ const Eigen::VectorXd Path::projectOnClosestConnectionKeepingPastPrj(const Eigen
   if(min_distance == std::numeric_limits<double>::infinity())
   {
     projection = past_prj;
-    ROS_ERROR("projection on path not found");
+    RCLCPP_ERROR(logger, "projection on path not found");
   }
   else  n_conn = idx;
 
@@ -591,7 +595,7 @@ const Eigen::VectorXd Path::projectOnClosestConnectionKeepingCurvilinearAbscissa
 
   if(verbose)
   {
-    ROS_INFO_STREAM("last conn: "<<n_conn<<" point: "<<point.transpose()<<" past prj: "<<past_prj.transpose());
+    RCLCPP_INFO_STREAM(logger, "last conn: "<<n_conn<<" point: "<<point.transpose()<<" past prj: "<<past_prj.transpose());
   }
 
   ConnectionPtr conn;
@@ -603,7 +607,7 @@ const Eigen::VectorXd Path::projectOnClosestConnectionKeepingCurvilinearAbscissa
     bool in_connection;
     pr = projectOnConnection(point,conn,distance,in_connection);
 
-    if(verbose) ROS_INFO_STREAM("conn number: "<< i<<" in_conn: "<<in_connection);
+    if(verbose) RCLCPP_INFO_STREAM(logger, "conn number: "<< i<<" in_conn: "<<in_connection);
 
     if(in_connection)
     {
@@ -613,30 +617,30 @@ const Eigen::VectorXd Path::projectOnClosestConnectionKeepingCurvilinearAbscissa
         {
           double abscissa = curvilinearAbscissaOfPointGivenConnection(pr,i);
 
-          if(verbose) ROS_INFO_STREAM("distance: "<<distance<<" min_dist: "<<min_distance<< " abscissa: "<<abscissa<< " past_abscissa"<< past_abscissa);
+          if(verbose) RCLCPP_INFO_STREAM(logger, "distance: "<<distance<<" min_dist: "<<min_distance<< " abscissa: "<<abscissa<< " past_abscissa"<< past_abscissa);
 
           if(abscissa>=past_abscissa)
           {
-            if(verbose) ROS_INFO("New candidate");
+            if(verbose) RCLCPP_INFO(logger, "New candidate");
 
             new_abscissa = abscissa;
             min_distance = distance;
             projection = pr;
             idx = i;
           }
-          else if(verbose) ROS_WARN("Not a candidate");
+          else if(verbose) RCLCPP_WARN(logger, "Not a candidate");
         }
       }
     }
 
-    if(verbose) ROS_INFO("------------------------------");
+    if(verbose) RCLCPP_INFO(logger, "------------------------------");
   }
 
   if(min_distance == std::numeric_limits<double>::infinity())
   {
     new_abscissa = past_abscissa;
     projection = past_prj;
-    ROS_ERROR("projection on path not found");
+    RCLCPP_ERROR(logger, "projection on path not found");
   }
   else  n_conn = idx;
 
@@ -743,7 +747,7 @@ NodePtr Path::addNodeAtCurrentConfig(const Eigen::VectorXd& configuration, Conne
 {
   if(rewire && !tree_)
   {
-    ROS_ERROR("Tree not set, the new node can't be added to the path");
+    RCLCPP_ERROR(logger, "Tree not set, the new node can't be added to the path");
     assert(0);
     return NULL;
   }
@@ -755,12 +759,12 @@ NodePtr Path::addNodeAtCurrentConfig(const Eigen::VectorXd& configuration, Conne
 
     if(parent->getConfiguration() == configuration)
     {
-      ROS_WARN("Node equal to parent");
+      RCLCPP_WARN(logger, "Node equal to parent");
       return parent;
     }
     else if(child ->getConfiguration() == configuration)
     {
-      ROS_WARN("Node equal to child");
+      RCLCPP_WARN(logger, "Node equal to child");
       return child;
     }
     else
@@ -840,7 +844,7 @@ NodePtr Path::addNodeAtCurrentConfig(const Eigen::VectorXd& configuration, Conne
     }
   }
 
-  ROS_ERROR("Connection not found, the node can't be created");
+  RCLCPP_ERROR(logger, "Connection not found, the node can't be created");
 
   return NULL;
 }
@@ -849,7 +853,7 @@ NodePtr Path::findCloserNode(const Eigen::VectorXd& configuration, double &dist)
 {
   if(connections_.size()<1)
   {
-    ROS_ERROR("No connections");
+    RCLCPP_ERROR(logger, "No connections");
     throw std::invalid_argument("No connections");
   }
 
@@ -911,7 +915,7 @@ PathPtr Path::getSubpathToConf(const Eigen::VectorXd& conf, const bool get_copy)
 
   if(!conn)
   {
-    ROS_ERROR("Conf does not belong to the path, subpath to conf can not be computed");
+    RCLCPP_ERROR(logger, "Conf does not belong to the path, subpath to conf can not be computed");
     assert(0);
   }
 
@@ -987,7 +991,7 @@ PathPtr Path::getSubpathFromConf(const Eigen::VectorXd& conf, const bool get_cop
 
   if(!conn)
   {
-    ROS_ERROR("Conf does not belong to the path, subpath from conf can not be computed");
+    RCLCPP_ERROR(logger, "Conf does not belong to the path, subpath from conf can not be computed");
     assert(0);
   }
 
@@ -1047,8 +1051,8 @@ PathPtr Path::getSubpathToNode(const Eigen::VectorXd& conf)
 {
   if((conf-connections_.front()->getParent()->getConfiguration()).norm()<1e-06)
   {
-    ROS_ERROR("No subpath available, the node is equal to the first node of the path");
-    ROS_INFO_STREAM("configuration: "<<conf.transpose());
+    RCLCPP_ERROR(logger, "No subpath available, the node is equal to the first node of the path");
+    RCLCPP_INFO_STREAM(logger, "configuration: "<<conf.transpose());
     throw std::invalid_argument("No subpath available, the node is equal to the first node of the path");
   }
 
@@ -1070,8 +1074,8 @@ PathPtr Path::getSubpathToNode(const Eigen::VectorXd& conf)
     }
   }
 
-  ROS_ERROR("The node doesn to belong to this path");
-  ROS_INFO_STREAM("configuration: "<<conf.transpose());
+  RCLCPP_ERROR(logger, "The node doesn to belong to this path");
+  RCLCPP_INFO_STREAM(logger, "configuration: "<<conf.transpose());
   throw std::invalid_argument("The node doesn to belong to this path");
 }
 
@@ -1084,8 +1088,8 @@ PathPtr Path::getSubpathFromNode(const Eigen::VectorXd& conf)
 {
   if((conf-connections_.back()->getChild()->getConfiguration()).norm()<1e-06)
   {
-    ROS_ERROR("No subpath available, the node is equal to the last node of the path");
-    ROS_INFO_STREAM("configuration: "<<conf.transpose());
+    RCLCPP_ERROR(logger, "No subpath available, the node is equal to the last node of the path");
+    RCLCPP_INFO_STREAM(logger, "configuration: "<<conf.transpose());
     throw std::invalid_argument("No subpath available, the node is equal to the last node of the path");
   }
 
@@ -1107,8 +1111,8 @@ PathPtr Path::getSubpathFromNode(const Eigen::VectorXd& conf)
     }
   }
 
-  ROS_ERROR("The node doesn t belong to this path");
-  ROS_INFO_STREAM("configuration: "<<conf.transpose());
+  RCLCPP_ERROR(logger, "The node doesn t belong to this path");
+  RCLCPP_INFO_STREAM(logger, "configuration: "<<conf.transpose());
   throw std::invalid_argument("The node doesn to belong to this path");
 }
 
@@ -1260,7 +1264,7 @@ bool Path::isValidFromConf(const Eigen::VectorXd &conf, int &pos_closest_obs_fro
     }
     else
     {
-      ROS_INFO("conf is equal to goal, no connection to validate from here");
+      RCLCPP_INFO(logger, "conf is equal to goal, no connection to validate from here");
       validity = true;
       assert(0);
     }
@@ -1290,27 +1294,27 @@ bool Path::isValidFromConf(const Eigen::VectorXd &conf, int &pos_closest_obs_fro
   return validity;
 }
 
-XmlRpc::XmlRpcValue Path::toXmlRpcValue(bool reverse) const
-{
-  XmlRpc::XmlRpcValue x;
-  if (connections_.size()==0)
-    return x;
-  x.setSize(connections_.size()+1);
+//XmlRpc::XmlRpcValue Path::toXmlRpcValue(bool reverse) const
+//{
+//  XmlRpc::XmlRpcValue x;
+//  if (connections_.size()==0)
+//    return x;
+//  x.setSize(connections_.size()+1);
 
-  if (not reverse)
-  {
-    x[0]=connections_.at(0)->getParent()->toXmlRpcValue();
-    for (size_t idx=0;idx<connections_.size();idx++)
-      x[idx+1]=connections_.at(idx)->getChild()->toXmlRpcValue();
-  }
-  else
-  {
-    x[0]=connections_.back()->getChild()->toXmlRpcValue();
-    for (size_t idx=0;idx<connections_.size();idx++)
-      x[idx+1]=connections_.at(connections_.size()-idx-1)->getParent()->toXmlRpcValue();
-  }
-  return x;
-}
+//  if (not reverse)
+//  {
+//    x[0]=connections_.at(0)->getParent()->toXmlRpcValue();
+//    for (size_t idx=0;idx<connections_.size();idx++)
+//      x[idx+1]=connections_.at(idx)->getChild()->toXmlRpcValue();
+//  }
+//  else
+//  {
+//    x[0]=connections_.back()->getChild()->toXmlRpcValue();
+//    for (size_t idx=0;idx<connections_.size();idx++)
+//      x[idx+1]=connections_.at(connections_.size()-idx-1)->getParent()->toXmlRpcValue();
+//  }
+//  return x;
+//}
 
 void Path::flip()
 {

@@ -60,7 +60,8 @@ Eigen::VectorXd InformedSampler::sample()
       if (in_of_bounds)
         return q;
     }
-    ROS_DEBUG_THROTTLE(0.1, "unable to find a feasible point in the ellipse");
+    // RCLCPP_DEBUG_THROTTLE(logger, 0.1, "unable to find a feasible point in the ellipse");
+    RCLCPP_DEBUG_ONCE(logger, "unable to find a feasible point in the ellipse");
     return center_bound_ + Eigen::MatrixXd::Random(ndof_, 1).cwiseProduct(bound_width_);
   }
 }
@@ -88,9 +89,9 @@ void InformedSampler::setCost(const double &cost)
 
   if (cost_ < focii_distance_)
   {
-    ROS_WARN("cost is %f, focci distance is %f", cost_, focii_distance_);
-    ROS_WARN_STREAM("start_configuration: " << start_configuration_.transpose());
-    ROS_WARN_STREAM("stop_configuration: " << stop_configuration_.transpose());
+    RCLCPP_WARN(logger, "cost is %f, focci distance is %f", cost_, focii_distance_);
+    RCLCPP_WARN_STREAM(logger, "start_configuration: " << start_configuration_.transpose());
+    RCLCPP_WARN_STREAM(logger, "stop_configuration: " << stop_configuration_.transpose());
     cost_ = focii_distance_;
     min_radius_ = 0.0;
   }

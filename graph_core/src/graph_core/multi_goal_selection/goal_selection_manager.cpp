@@ -52,50 +52,50 @@ GoalSelectionManager::GoalSelectionManager(const std::string& name, const unsign
 
   if (!nh_.getParam("policy_type",policy_type_))
   {
-    ROS_DEBUG("policy type not set. Default: MultiArmedBandit");
+    RCLCPP_DEBUG(logger, "policy type not set. Default: MultiArmedBandit");
     policy_type_="MultiArmedBandit";
   }
 
   if (!nh_.getParam("policy_name",policy_name_))
   {
-    ROS_DEBUG("policy name not set. Deafult: eGreedy");
+    RCLCPP_DEBUG(logger, "policy name not set. Deafult: eGreedy");
     policy_name_="eGreedy";
   }
 
   if (!nh_.getParam("reward_fcn",reward_fcn_name_))
   {
-    ROS_DEBUG("reward fcn not set. Default: RelativeImprovement");
+    RCLCPP_DEBUG(logger, "reward fcn not set. Default: RelativeImprovement");
     reward_fcn_name_="RelativeImprovement";
   }
 
   if (!nh_.getParam("warm_start_reward",do_warm_start_))
   {
-    ROS_DEBUG("warm start not set.");
+    RCLCPP_DEBUG(logger, "warm start not set.");
     do_warm_start_=false;
   }
 
   if (!policy_type_.compare("MultiArmedBandit"))
   {
-    ROS_INFO_STREAM("Policy type: " << policy_type_);
+    RCLCPP_INFO_STREAM(logger, "Policy type: " << policy_type_);
     if (!policy_name_.compare("eGreedy"))
     {
       policy_ = std::make_shared<multi_goal_selection::PolicyMABEGreedy>(nh_.getNamespace(),goal_number_);
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else if (!policy_name_.compare("UCB1"))
     {
       policy_ = std::make_shared<multi_goal_selection::PolicyMABUCB>(nh_.getNamespace(),goal_number_);
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else if (!policy_name_.compare("Thomson"))
     {
       policy_ = std::make_shared<multi_goal_selection::PolicyMABTS>(nh_.getNamespace(),goal_number_);
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else if (!policy_name_.compare("PolicyUniformOnGoals"))
     {
       policy_ = std::make_shared<multi_goal_selection::PolicyUniformOnGoals>(nh_.getNamespace(),goal_number_);
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else if (!policy_name_.compare("PolicyUniformOnVolume"))
     {
@@ -103,56 +103,56 @@ GoalSelectionManager::GoalSelectionManager(const std::string& name, const unsign
       if (reward_fcn_name_.compare("BestCost"))
       {
         reward_fcn_name_ = "BestCost";
-        ROS_WARN("Reward fcn automatically set to BestCost because policy required by UniformOnVolume policy.");
+        RCLCPP_WARN(logger, "Reward fcn automatically set to BestCost because policy required by UniformOnVolume policy.");
       }
       if (!do_warm_start_)
       {
         do_warm_start_ = true;
-        ROS_WARN("Warm start automatically set because required by UniformOnVolume policy.");
+        RCLCPP_WARN(logger, "Warm start automatically set because required by UniformOnVolume policy.");
       }
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else
     {
-      ROS_FATAL_STREAM("unexpected policy_name_ : " << policy_name_);
+      RCLCPP_FATAL_STREAM(logger, "unexpected policy_name_ : " << policy_name_);
     }
   }
   else if (!policy_type_.compare("Custom"))
   {
-    ROS_INFO_STREAM("Policy type: " << policy_type_);
+    RCLCPP_INFO_STREAM(logger, "Policy type: " << policy_type_);
     if (!policy_name_.compare("Custom1"))
     {
       policy_ = std::make_shared<multi_goal_selection::PolicyCustomExample>(nh_.getNamespace(),goal_number_);
-      ROS_INFO_STREAM("Policy name: " << policy_name_);
+      RCLCPP_INFO_STREAM(logger, "Policy name: " << policy_name_);
     }
     else
     {
-      ROS_FATAL_STREAM("unexpected policy_name_ : " << policy_name_);
+      RCLCPP_FATAL_STREAM(logger, "unexpected policy_name_ : " << policy_name_);
     }
   }
   else
   {
-    ROS_FATAL_STREAM("unexpected policy_type_ : " << policy_type_);
+    RCLCPP_FATAL_STREAM(logger, "unexpected policy_type_ : " << policy_type_);
   }
 
   if (!reward_fcn_name_.compare("RelativeImprovement"))
   {
     reward_fcn_ = std::make_shared<multi_goal_selection::RewardRelativeImprovement>();
-    ROS_INFO("Reward name: RelativeImprovement");
+    RCLCPP_INFO(logger, "Reward name: RelativeImprovement");
   }
   else if (!reward_fcn_name_.compare("Bernoulli"))
   {
     reward_fcn_ = std::make_shared<multi_goal_selection::RewardBernoulli>();
-    ROS_INFO("Reward name: Bernoulli");
+    RCLCPP_INFO(logger, "Reward name: Bernoulli");
   }
   else if (!reward_fcn_name_.compare("BestCost"))
   {
     reward_fcn_ = std::make_shared<multi_goal_selection::RewardBestCost>();
-    ROS_INFO("Reward name: BestCost");
+    RCLCPP_INFO(logger, "Reward name: BestCost");
   }
   else
   {
-    ROS_FATAL_STREAM("unexpected reward_fcn_name_ : " << reward_fcn_name_);
+    RCLCPP_FATAL_STREAM(logger, "unexpected reward_fcn_name_ : " << reward_fcn_name_);
   }
 }
 
@@ -171,7 +171,7 @@ std::vector<double> GoalSelectionManager::calculateProbabilities(const std::vect
     }
   }
 
-//  ROS_WARN("updated state");
+//  RCLCPP_WARN(logger, "updated state");
 
   goal_probabilities_ = policy_->getProbabilities();
   return goal_probabilities_;

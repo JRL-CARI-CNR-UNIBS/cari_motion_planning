@@ -51,7 +51,8 @@ Eigen::VectorXd LocalInformedSampler::sample()
         return q;
     }
   }
-  ROS_WARN_THROTTLE(0.1, "unable to find a feasible point in the radius");
+  // ROS_WARN_THROTTLE(0.1, "unable to find a feasible point in the radius");
+  RCLCPP_WARN(logger, "unable to find a feasible point in the radius");
   return center_bound_ + Eigen::MatrixXd::Random(ndof_, 1).cwiseProduct(bound_width_);
 
 }

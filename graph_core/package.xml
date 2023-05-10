@@ -11,36 +11,40 @@
 
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>actionlib</build_depend>
+  <!-- <build_depend>actionlib</build_depend> -->
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_ros_planning</build_depend>
   <build_depend>moveit_ros_planning_interface</build_depend>
-  <build_depend>roscpp</build_depend>
+  <build_depend>rclcpp</build_depend>
   <build_depend>rosdyn_core</build_depend>
   <build_export_depend>actionlib</build_export_depend>
   <build_export_depend>moveit_core</build_export_depend>
   <build_export_depend>moveit_ros_planning</build_export_depend>
   <build_export_depend>moveit_ros_planning_interface</build_export_depend>
-  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rclcpp</build_export_depend>
   <build_export_depend>rosdyn_core</build_export_depend>
   <exec_depend>actionlib</exec_depend>
   <exec_depend>moveit_core</exec_depend>
   <exec_depend>moveit_ros_planning</exec_depend>
   <exec_depend>moveit_ros_planning_interface</exec_depend>
-  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rclcpp</exec_depend>
   <exec_depend>rosdyn_core</exec_depend>
   <depend>moveit_visual_tools</depend>
   <depend>rviz_visual_tools</depend>
 
-  <depend>human_probablistic_occupancy</depend>
+  <!-- <depend>human_probablistic_occupancy</depend> -->
   <depend>eigen_conversions</depend>
   <depend>geometry_msgs</depend>
-  <depend>velocity_scaling_iso15066</depend>
+  <!-- <depend>velocity_scaling_iso15066</depend> -->
 
 
-  <!-- The export tag contains other, unspecified, tags -->
+  <!-- ament_cmake -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

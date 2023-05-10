@@ -30,59 +30,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace pathplan
 {
 
-bool TreeSolver::config(const ros::NodeHandle& nh)
+//bool TreeSolver::config(const ros::NodeHandle& nh)
+bool TreeSolver::config(const std::shared_ptr<rclcpp::Node>& nh)
 {
   nh_ = nh;
   max_distance_ = 1;
-  if (!nh.getParam("max_distance",max_distance_))
+  if (!nh->get_parameter("max_distance",max_distance_))
   {
-    ROS_WARN("%s/max_distance is not set. using 1.0",nh.getNamespace().c_str());
+    RCLCPP_WARN(logger, "%s/max_distance is not set. using 1.0",nh->get_effective_namespace().c_str());
     max_distance_=1.0;
   }
-
-  if (!nh.getParam("use_kdtree",use_kdtree_))
+  if (!nh->get_parameter("use_kdtree",use_kdtree_))
   {
-    ROS_DEBUG("%s/use_kdtree is not set. set true",nh.getNamespace().c_str());
+    RCLCPP_DEBUG(logger, "%s/use_kdtree is not set. set true",nh->get_effective_namespace().c_str());
     use_kdtree_=true;
   }
 
-  if (!nh.getParam("informed",informed_))
+  if (!nh->get_parameter("informed",informed_))
   {
-    ROS_DEBUG("%s/informed is not set. using true (informed set enble)",nh.getNamespace().c_str());
+    RCLCPP_DEBUG(logger, "%s/informed is not set. using true (informed set enble)",nh->get_effective_namespace().c_str());
     informed_=true;
   }
 
-  if (!nh.getParam("extend",extend_))
+  if (!nh->get_parameter("extend",extend_))
   {
-    ROS_WARN("%s/extend is not set. using false (connect algorithm)",nh.getNamespace().c_str());
+    RCLCPP_WARN(logger, "%s/extend is not set. using false (connect algorithm)",nh->get_effective_namespace().c_str());
     extend_=false;
   }
 
-  if (!nh.getParam("warp",warp_))
+  if (!nh->get_parameter("warp",warp_))
   {
-    ROS_DEBUG("%s/warp is not set. using false",nh.getNamespace().c_str());
+    RCLCPP_DEBUG(logger, "%s/warp is not set. using false",nh->get_effective_namespace().c_str());
     warp_=false;
   }
 
   if (not warp_)
   {
-    if (!nh.getParam("warp_once",first_warp_))
+    if (!nh->get_parameter("warp_once",first_warp_))
     {
-      ROS_DEBUG("%s/warp_once is not set. using false",nh.getNamespace().c_str());
+      RCLCPP_DEBUG(logger, "%s/warp_once is not set. using false",nh->get_effective_namespace().c_str());
       first_warp_=false;
     }
   }
   else
     first_warp_=true;
 
-  if (!nh.getParam("utopia_tolerance",utopia_tolerance_))
+  if (!nh->get_parameter("utopia_tolerance",utopia_tolerance_))
   {
-    ROS_WARN("%s/utopia_tolerance is not set. using 0.01",nh.getNamespace().c_str());
+    RCLCPP_WARN(logger, "%s/utopia_tolerance is not set. using 0.01",nh->get_effective_namespace().c_str());
     utopia_tolerance_=0.01;
   }
   if (utopia_tolerance_<=0.0)
   {
-    ROS_WARN("%s/utopia_tolerance cannot be negative, set equal to 0.0",nh.getNamespace().c_str());
+    RCLCPP_WARN(logger, "%s/utopia_tolerance cannot be negative, set equal to 0.0",nh->get_effective_namespace().c_str());
     utopia_tolerance_=0.0;
   }
   utopia_tolerance_+=1.0;
@@ -94,7 +94,7 @@ bool TreeSolver::config(const ros::NodeHandle& nh)
 
 bool TreeSolver::solve(PathPtr &solution, const unsigned int& max_iter, const double& max_time)
 {
-  ros::WallTime tic = ros::WallTime::now();
+  rclcpp::Time tic = rclcpp::Clock(RCL_SYSTEM_TIME).now();
 
   if(max_time <=0.0) return false;
 
@@ -102,39 +102,40 @@ bool TreeSolver::solve(PathPtr &solution, const unsigned int& max_iter, const do
   {
     if (update(solution))
     {
-      //ROS_INFO("Solved in %u iterations", iter);
+      //RCLCPP_INFO(logger, "Solved in %u iterations", iter);
       solved_ = true;
       return true;
     }
 
-    if((ros::WallTime::now()-tic).toSec()>=0.98*max_time)
+    if((rclcpp::Clock(RCL_SYSTEM_TIME).now()-tic).seconds()>=0.98*max_time)
       break;
   }
   return false;
 }
 
-bool TreeSolver::computePath(const NodePtr &start_node, const NodePtr &goal_node, const ros::NodeHandle& nh, PathPtr &solution, const double &max_time, const unsigned int max_iter)
+//bool TreeSolver::computePath(const NodePtr &start_node, const NodePtr &goal_node, const ros::NodeHandle& nh, PathPtr &solution, const double &max_time, const unsigned int max_iter)
+bool TreeSolver::computePath(const NodePtr &start_node, const NodePtr &goal_node, const std::shared_ptr<rclcpp::Node>& nh, PathPtr &solution, const double &max_time, const unsigned int max_iter)
 {
   config(nh);
   addStart(start_node);
   addGoal(goal_node);
 
-  ros::WallTime tic = ros::WallTime::now();
+  rclcpp::Time tic = rclcpp::Clock(RCL_SYSTEM_TIME).now();
 
   if (!solve(solution, max_iter, max_time))
   {
-    ROS_INFO("No solutions found");
+    RCLCPP_INFO(logger, "No solutions found");
 
-    ros::WallTime toc = ros::WallTime::now();
-    ROS_INFO_STREAM("time: "<<(toc-tic).toSec()<<" max_t: "<<max_time);
+    rclcpp::Time toc = rclcpp::Clock(RCL_SYSTEM_TIME).now();
+    RCLCPP_INFO_STREAM(logger, "time: "<<(toc-tic).seconds()<<" max_t: "<<max_time);
 
     assert(0);
 
     return false;
   }
 
-  ros::WallTime toc = ros::WallTime::now();
-  ROS_INFO_STREAM("time: "<<(toc-tic).toSec()<<" max_t: "<<max_time);
+  rclcpp::Time toc = rclcpp::Clock(RCL_SYSTEM_TIME).now();
+  RCLCPP_INFO_STREAM(logger, "time: "<<(toc-tic).seconds()<<" max_t: "<<max_time);
 
   return true;
 }
@@ -155,7 +156,7 @@ bool TreeSolver::setSolution(const PathPtr &solution, const bool& solved)
 
 bool TreeSolver::importFromSolver(const TreeSolverPtr& solver)
 {
-  ROS_INFO_STREAM("Import from Tree solver");
+  RCLCPP_INFO_STREAM(logger, "Import from Tree solver");
 
   config(getNodeHandle());
 

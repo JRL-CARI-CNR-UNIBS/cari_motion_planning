@@ -51,14 +51,14 @@ public:
                        const double& cost = std::numeric_limits<double>::infinity()):
     InformedSampler(start_configuration, stop_configuration, lower_bound, upper_bound, cost)
   {
-
+    logger = logger.get_child("local");
   }
 
   void addBall(const Eigen::VectorXd& center, const double& radius)
   {
     if (center.size() != start_configuration_.size())
     {
-      ROS_INFO("center size=%zu, start configuration =%zu", center.size(), start_configuration_.size());
+      RCLCPP_INFO(logger, "center size=%zu, start configuration =%zu", center.size(), start_configuration_.size());
     }
     assert(center.size() == start_configuration_.size());
     centers_.push_back(center);

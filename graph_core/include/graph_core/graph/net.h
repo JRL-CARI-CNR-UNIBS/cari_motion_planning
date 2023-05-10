@@ -41,6 +41,8 @@ protected:
 
   std::multimap<double,std::vector<ConnectionPtr>> computeConnectionFromNodeToNode(const NodePtr &start_node, const NodePtr &goal_node, std::vector<NodePtr>& visited_nodes);
 
+  rclcpp::Logger logger = rclcpp::get_logger("graph_net");
+
 public:
   Net(const TreePtr& tree): linked_tree_(tree){}
 

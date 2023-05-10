@@ -93,7 +93,7 @@ bool TubeInformedSampler::setRadius(const double &radius)
 {
   if (radius<=0)
   {
-    ROS_WARN("Radius should be positive");
+    RCLCPP_WARN(logger, "Radius should be positive");
     return false;
   }
   radius_=radius;
@@ -104,7 +104,7 @@ bool TubeInformedSampler::setLocalBias(const double& local_bias)
 {
   if ((local_bias<0) || (local_bias>1))
   {
-    ROS_WARN("Local bias should be between 0-1");
+    RCLCPP_WARN(logger, "Local bias should be between 0-1");
     return false;
   }
   local_bias_=local_bias;

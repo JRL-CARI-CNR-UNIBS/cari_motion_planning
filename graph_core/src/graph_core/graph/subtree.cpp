@@ -35,7 +35,8 @@ Subtree::Subtree(const TreePtr& parent_tree,
        parent_tree->getChecker(),parent_tree->getMetrics(),parent_tree->getUseKdTree()),
   parent_tree_(parent_tree)
 {
-  ROS_FATAL("QUI");
+  logger = logger.get_child("subtree");
+  RCLCPP_FATAL(logger, "QUI");
   populateTreeFromNode(root);
 }
 
@@ -77,12 +78,13 @@ Subtree::Subtree(const TreePtr& parent_tree,
        parent_tree->getChecker(),parent_tree->getMetrics(),parent_tree->getUseKdTree()),
   parent_tree_(parent_tree)
 {
+  logger = logger.get_child("subtree");
   if(((root->getConfiguration()-focus1).norm()+(root->getConfiguration()-focus2).norm())<cost)
     populateTreeFromNode(root,focus1,focus2,cost,white_list);
   else
   {
-    ROS_WARN("Root of subtree is not inside the ellipsoid!");
-    ROS_INFO_STREAM("Root:\n "<<*root<<"\nFocus1: "<<focus1.transpose()<<"\nFocus2: "<<focus1.transpose()<<"\nCost: "<<cost);
+    RCLCPP_WARN(logger, "Root of subtree is not inside the ellipsoid!");
+    RCLCPP_INFO_STREAM(logger, "Root:\n "<<*root<<"\nFocus1: "<<focus1.transpose()<<"\nFocus2: "<<focus1.transpose()<<"\nCost: "<<cost);
 
     populateTreeFromNode(root,white_list);
   }

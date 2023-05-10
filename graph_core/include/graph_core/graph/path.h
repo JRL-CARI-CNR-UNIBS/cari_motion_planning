@@ -50,6 +50,8 @@ protected:
 
   std::vector<bool> change_warp_;
 
+  rclcpp::Logger logger = rclcpp::get_logger("graph/path");
+
   void computeCost();
   void setChanged(const unsigned int& connection_idx);
   bool bisection(const unsigned int& connection_idx,
@@ -178,7 +180,7 @@ public:
 
   void flip();
 
-  XmlRpc::XmlRpcValue toXmlRpcValue(bool reverse=false) const;
+//  XmlRpc::XmlRpcValue toXmlRpcValue(bool reverse=false) const;
   friend std::ostream& operator<<(std::ostream& os, const Path& path);
 };
 

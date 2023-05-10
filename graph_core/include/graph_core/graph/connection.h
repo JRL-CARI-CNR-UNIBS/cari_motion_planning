@@ -41,6 +41,8 @@ protected:
   double time_;
   double likelihood_;
 
+  rclcpp::Logger logger = rclcpp::get_logger("graph/connection");
+
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Connection(const NodePtr& parent, const NodePtr& child, const double& time=0.0);

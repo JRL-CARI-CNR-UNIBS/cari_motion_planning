@@ -32,6 +32,7 @@ namespace pathplan
 NetConnection::NetConnection(const NodePtr &parent, const NodePtr &child):
   Connection(parent,child)
 {
+  logger = logger.get_child("net");
 }
 
 void NetConnection::add()
@@ -51,14 +52,14 @@ void NetConnection::remove()
     parent_->remoteNetChildConnection(pointer());
   }
   else
-    ROS_FATAL("parent already destroied");
+    RCLCPP_FATAL(logger, "parent already destroied");
 
   if (child_)
   {
     child_->remoteNetParentConnection(pointer());
   }
   else
-    ROS_FATAL("child already destroied");
+    RCLCPP_FATAL(logger, "child already destroied");
 }
 
 ConnectionPtr NetConnection::clone()

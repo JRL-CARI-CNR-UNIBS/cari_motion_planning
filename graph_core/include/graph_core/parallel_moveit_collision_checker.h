@@ -69,7 +69,7 @@ public:
 
   ~ParallelMoveitCollisionChecker();
 
-  virtual void setPlanningSceneMsg(const moveit_msgs::PlanningScene& msg);
+  virtual void setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& msg);
 
   virtual void setPlanningScene(planning_scene::PlanningScenePtr &planning_scene);
 

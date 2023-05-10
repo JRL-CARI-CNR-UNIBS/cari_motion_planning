@@ -36,7 +36,6 @@ namespace pathplan {
 class TimeBasedInformedSampler: public InformedSampler
 {
 protected:
-protected:
   Eigen::VectorXd max_speed_;
   Eigen::VectorXd inv_max_speed_;
   double utopia_;

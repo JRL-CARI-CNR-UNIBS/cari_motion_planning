@@ -38,7 +38,7 @@ protected:
   planning_scene::PlanningScenePtr planning_scene_;
   collision_detection::CollisionRequest req_;
   collision_detection::CollisionResult res_;
-  robot_state::RobotStatePtr state_;
+  moveit::core::RobotStatePtr state_;
   std::string group_name_;
 
   const moveit::core::JointModelGroup* jmg_;
@@ -55,8 +55,10 @@ public:
     group_name_(group_name),
     planning_scene_(planning_scene)
   {
+    logger = logger.get_child("moveit");
 
-    state_ = std::make_shared<robot_state::RobotState>(planning_scene_->getCurrentState());
+
+    state_ = std::make_shared<moveit::core::RobotState>(planning_scene_->getCurrentState());
     jmg_ = state_->getJointModelGroup(group_name_);
     joint_names_=jmg_->getActiveJointModelNames();
     joint_models_=jmg_->getActiveJointModels();
@@ -64,14 +66,15 @@ public:
 
 
     if (!planning_scene_)
-      ROS_ERROR("invalid planning scene");
+      RCLCPP_ERROR(logger, "invalid planning scene");
   }
 
-  virtual void setPlanningSceneMsg(const moveit_msgs::PlanningScene& msg)
+  virtual void setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& msg)
   {
     if (!planning_scene_->setPlanningSceneMsg(msg))
     {
-      ROS_ERROR_THROTTLE(1,"unable to upload scene");
+      // RCLCPP_ERROR_THROTTLE(1,"unable to upload scene");
+      RCLCPP_ERROR(logger, "unable to upload scene");
     }
   }
 
@@ -91,7 +94,7 @@ public:
 
     if (!state_->satisfiesBounds(jmg_))
     {
-      ROS_DEBUG("Out of bound");
+      RCLCPP_DEBUG(logger, "Out of bound");
       return false;
     }
     state_->update();
