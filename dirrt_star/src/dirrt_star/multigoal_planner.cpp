@@ -280,6 +280,11 @@ bool MultigoalPlanner::solve ( planning_interface::MotionPlanDetailedResponse& r
   Eigen::VectorXd start_conf;
   start_state.copyJointGroupPositions(group_,start_conf);
 
+  for (size_t ij=0;ij<joint_names_.size();ij++)
+  {
+    start_state.setJointPositions(joint_names_.at(ij),&start_conf(ij));
+  }
+
   if (!checker->check(start_conf))
   {
     ROS_ERROR("Start point is in collision");
@@ -300,6 +305,9 @@ bool MultigoalPlanner::solve ( planning_interface::MotionPlanDetailedResponse& r
     else
     {
       ROS_FATAL("you shouldn't be here!");
+      ROS_FATAL_STREAM("start state = " << start_state);
+      ROS_FATAL_STREAM("req start state = " << request_.start_state);
+
     }
     res.error_code_.val=moveit_msgs::MoveItErrorCodes::START_STATE_IN_COLLISION;
     m_is_running=false;

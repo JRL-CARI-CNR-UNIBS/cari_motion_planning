@@ -137,7 +137,7 @@ void ParallelMoveitCollisionChecker::collisionThread(int thread_idx)
       stop_check_=true;
       break;
     }
-    //    state->updateCollisionBodyTransforms();
+    state->updateCollisionBodyTransforms();
 
     if (planning_scenes_.at(thread_idx)->isStateColliding(*state,group_name_))
     {
