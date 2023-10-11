@@ -37,7 +37,7 @@ find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 #find_package(rosdyn_core REQUIRED)
 #find_package(human_probablistic_occupancy REQUIRED)
-find_package(moveit_visual_tools REQUIRED)
+# find_package(moveit_visual_tools REQUIRED)
 find_package(rviz_visual_tools REQUIRED)
 #find_package(eigen_conversions REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -75,7 +75,7 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/graph/tree.cpp
   src/${PROJECT_NAME}/graph/subtree.cpp
   src/${PROJECT_NAME}/graph/path.cpp
-  src/${PROJECT_NAME}/graph/graph_display.cpp
+  # src/${PROJECT_NAME}/graph/graph_display.cpp
   # src/${PROJECT_NAME}/solvers/multigoal.cpp
   # src/${PROJECT_NAME}/solvers/time_multigoal.cpp
   src/${PROJECT_NAME}/solvers/tree_solver.cpp
@@ -86,8 +86,8 @@ add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/solvers/path_solver.cpp
   src/${PROJECT_NAME}/datastructure/kdtree.cpp
   src/${PROJECT_NAME}/datastructure/vector.cpp
-
   )
+
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
@@ -100,34 +100,35 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp
   # rosdyn_core
   #human_probablistic_occupancy
-  moveit_visual_tools
+  # moveit_visual_tools
   rviz_visual_tools
  # eigen_conversions
   geometry_msgs
   # velocity_scaling_iso15066
   )
 
-# add_executable(goal_selection_test_node tests/goal_selection_test_node.cpp)
-# add_dependencies(goal_selection_test_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(goal_selection_test_node
-#   ${catkin_LIBRARIES}
-#   ${PROJECT_NAME}
-# )
-
-
-# install(TARGETS ${PROJECT_NAME}
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-#   )
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  moveit_core
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  rclcpp
+  # rosdyn_core
+  # human_probablistic_occupancy
+  # moveit_visual_tools
+  rviz_visual_tools
+  geometry_msgs
+  # velocity_scaling_iso15066
+)
 
 install(TARGETS ${PROJECT_NAME}
+  EXPORT  ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
   )
 
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include/
   DESTINATION include
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
